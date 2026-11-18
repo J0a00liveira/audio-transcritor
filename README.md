@@ -1,78 +1,91 @@
 <img alt="Github License" src="https://img.shields.io/github/license/J0a00liveira/audio-transcritor" />  <img alt="GitHub Top Language" src="https://img.shields.io/github/languages/top/J0a00liveira/audio-transcritor" />
-# Transcritor de áudio com OpenAI Whisper           
+# Audio Transcritor
 
-Este script realiza a transcrição automática de arquivos de áudio (MP3, MP4, M4A) para texto, utilizando o modelo Whisper da OpenAI. Ele suporta transcrição com marcação de tempo, o que permite identificar em qual parte do áudio cada segmento de texto foi falado. O script salva as transcrições em arquivos de texto com informações de tempo para cada palavra ou segmento. Resolvi fazer este projeto por conta de uma necessidade em transcrever áudios para um trabalho, porem a maioria dos sites exige pagamento para áudios relativamente curtos, com isso, resolvi desenvolver e adaptar a minha necessidade aproveitando este modelo da OpenAI.
+Ferramenta de linha de comando em Python que transcreve arquivos de áudio e vídeo para texto usando o [Whisper](https://github.com/openai/whisper), modelo de reconhecimento de fala da OpenAI. Cada trecho transcrito vem com a marcação de tempo de início e fim.
 
-- Utilize da maneira que precisar, os únicos pontos de atenção que preciso levantar são:
-  - É uma transcrição feita por IA, podem e vão existir erros, sempre confira o arquivo gerado.
-  - É um processo normalmente pesado, exige de recursos da sua máquina, de preferência que possua uma gpu, caso contrario será feito com a cpu e pode levar mais tempo. (mas funciona, eu acho 🙃)
- 
-[Confira a documentação do whisper aqui](https://github.com/openai/whisper) e veja idiomas disponíveis e os tamanhos para cada tipo de modelo.
+<!-- Coloque aqui um print do terminal durante a transcrição ou de um arquivo gerado -->
 
----
+## Funcionalidades
 
-### Requisitos
+- Transcreve arquivos `.mp3`, `.mp4` e `.m4a`
+- Processa em lote todos os arquivos da pasta `audio_files`
+- Gera um arquivo `.txt` por áudio, com marcação de tempo em cada trecho
+- Mostra no terminal o progresso e o tempo de cada transcrição
+- Cria as pastas necessárias e baixa os recursos do NLTK automaticamente na primeira execução
 
-Antes de rodar o script, você precisa instalar as dependências listadas no arquivo requirements.txt. O arquivo contém as bibliotecas necessárias para a execução do código. Para instalar basta executar o comando abaixo no terminal do projeto, recomendo que utilize um ambiente virtual para executar, caso queira utilizar deixarei abaixo um passo a passo.
+## Exemplo de saída
 
-<code>pip install -r requirements.txt</code>
+Arquivo `transcriptions/reuniao_transcription.txt`:
 
----
-<details>
-  <summary> como criar ambiente virtual </summary>
+```text
+[00:00.00 - 00:04.52] Bom dia a todos, vamos começar a reunião.
+[00:04.52 - 00:09.10] O primeiro ponto da pauta é o planejamento da sprint.
+```
 
-- Para criar um ambiente virtual com venv:
+## Pré-requisitos
 
-<code>python -m venv nome_do_ambiente</code>
+- Python 3
+- [FFmpeg](https://ffmpeg.org/download.html) instalado e disponível no PATH (o Whisper usa o FFmpeg para ler os arquivos)
 
-- Para ativar o ambiente
-  - No Linux:
-    <code>source nome_do_ambiente/bin/activate</code>
-  - No Windows:
-    <code>nome_do_ambiente\Scripts\activate</code>
+Instalação do FFmpeg:
 
-Após ativar o ambiente, basta rodar o comando `pip install -r requirements.txt` para instalar as bibliotecas.  
-</details>
+```bash
+# Ubuntu/Debian
+sudo apt update && sudo apt install ffmpeg
 
----
+# Windows (com Chocolatey)
+choco install ffmpeg
 
-### Como executar
+# macOS (com Homebrew)
+brew install ffmpeg
+```
 
-após executar o script para o requirements.txt, inclua seus arquivos na pasta **audio_file** e rode o arquivo principal: 
+## Instalação
 
-- linux: python3 transcrever.py
-- windows: python transcrever.py (ou outra versão do python que possa estar instalada, como a própria python3)
+```bash
+git clone https://github.com/J0a00liveira/audio-transcritor.git
+cd audio-transcritor
 
----
+# Recomendado: criar um ambiente virtual
+python3 -m venv venv
+source venv/bin/activate        # Linux/macOS
+# venv\Scripts\activate         # Windows
 
-### Exemplo de Transcrição
+pip install -r requirements.txt
+```
 
-O conteúdo do arquivo de transcrição será formatado da seguinte forma:
+## Como usar
 
-[00:00:01.00 - 00:00:05.00] Olá, bem-vindo ao tutorial de transcrição.
+1. Coloque os arquivos de áudio na pasta `audio_files` (ela é criada na primeira execução, se ainda não existir).
+2. Execute o script:
 
-[00:00:05.00 - 00:00:10.00] Neste áudio, vamos aprender como usar o Whisper.
+```bash
+python3 transcrever.py   # Linux/macOS
+python transcrever.py    # Windows
+```
 
----
+3. As transcrições são salvas na pasta `transcriptions`, com o nome `<nome_do_arquivo>_transcription.txt`.
 
-### Estrutura de Diretórios
+## Estrutura do projeto
 
-`audio_files/` - Diretório onde os arquivos de áudio devem ser armazenados.
+```text
+audio-transcritor/
+├── audio_files/        # Áudios de entrada
+├── transcriptions/     # Transcrições geradas
+├── transcrever.py      # Script principal
+├── requirements.txt
+└── LICENSE
+```
 
-`transcriptions/` - Diretório onde as transcrições serão salvas.
+## Observações
 
-`requirements.txt` - Arquivo com as dependências necessárias.
+- O projeto usa o modelo `base` do Whisper, que equilibra velocidade e precisão. Na primeira execução o modelo é baixado automaticamente.
+- A transcrição é feita por IA e pode conter erros. Revise o texto gerado antes de usá-lo.
+- O processamento exige bastante da máquina. Uma GPU acelera bastante, mas o script também funciona só com CPU, de forma mais lenta.
 
-`transcribe.py` - O script Python responsável pela transcrição.
+## Tecnologias
 
----
-
-### Detalhes de Implementação
-
-- O modelo Whisper é carregado usando `whisper.load_model("base")`, que oferece uma boa relação entre precisão e performance. Outros modelos maiores podem ser usados, mas podem exigir mais recursos computacionais, consulte a documentação.
-- o colorama é utilizado para melhorar a visibilidade do processo no terminal
-- warnings para ignorar alguns avisos, como no meu caso que utilizei uma máquina sem gpu, para que ele não fique sempre me alertando, mas você pode comentar as linhas 20 e 21 se quiser ver os alertas.
-- O nltk é utilizado para garantir que os dados de tokenização necessários sejam baixados, evitando erros durante a execução, e também auxilia na segmentação do texto.
-- O script detecta automaticamente o sistema operacional e ajusta o local onde os dados do NLTK serão armazenados.
-- Os arquivos de áudio são processados em ordem, e a transcrição é salva com as marcas de tempo de início e fim de cada segmento falado.
-- Durante a execução, o script mostra mensagens no terminal com feedback sobre o progresso da transcrição, incluindo tempo de transcrição e sucesso da operação.
+- [Python](https://www.python.org/)
+- [OpenAI Whisper](https://github.com/openai/whisper): reconhecimento de fala
+- [NLTK](https://www.nltk.org/): processamento de texto
+- [Colorama](https://pypi.org/project/colorama/): cores na saída do terminal
